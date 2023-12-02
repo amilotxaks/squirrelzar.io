@@ -49,3 +49,7 @@ def main():
 
     while True:
         runGame()
+
+
+if __name__ == '__main__':
+    main()
