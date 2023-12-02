@@ -1,0 +1,51 @@
+import random, sys, time, math, pygame
+from pygame.locals import *
+
+FPS = 30
+WINWIDTH = 640 
+WINHEIGHT = 480 
+HALF_WINWIDTH = int(WINWIDTH / 2)
+HALF_WINHEIGHT = int(WINHEIGHT / 2)
+
+GRASSCOLOR = (14, 255, 00)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+
+CAMERASLACK = 90     
+MOVERATE = 9         
+BOUNCERATE = 6       
+BOUNCEHEIGHT = 30    
+STARTSIZE = 25       
+WINSIZE = 300        
+INVULNTIME = 2       
+GAMEOVERTIME = 4    
+MAXHEALTH = 3
+
+NUMGRASS = 80        
+NUMSQUIRRELS = 30    
+SQUIRRELMINSPEED = 3 
+SQUIRRELMAXSPEED = 7 
+DIRCHANGEFREQ = 2    
+LEFT = 'left'
+RIGHT = 'right'
+
+
+def main():
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, L_SQUIR_IMG, R_SQUIR_IMG, GRASSIMAGES
+
+    pygame.init()
+    FPSCLOCK = pygame.time.Clock()
+    pygame.display.set_icon(pygame.image.load('gameicon.png'))
+    DISPLAYSURF = pygame.display.set_mode((WINWIDTH, WINHEIGHT))
+    pygame.display.set_caption('Squirrelzario')
+    BASICFONT = pygame.font.Font('freesansbold.ttf', 32)
+
+    
+    L_SQUIR_IMG = pygame.image.load('squirrel.png')
+    R_SQUIR_IMG = pygame.transform.flip(L_SQUIR_IMG, True, False)
+    GRASSIMAGES = []
+    for i in range(1, 5):
+        GRASSIMAGES.append(pygame.image.load('grass%s.png' % i))
+
+    while True:
+        runGame()
