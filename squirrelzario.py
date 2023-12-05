@@ -37,7 +37,7 @@ def main():
     FPSCLOCK = pygame.time.Clock()
     pygame.display.set_icon(pygame.image.load('gameicon.png'))
     DISPLAYSURF = pygame.display.set_mode((WINWIDTH, WINHEIGHT))
-    pygame.display.set_caption('Squirrelzario')
+    pygame.display.set_caption('Squirrelzar.io')
     BASICFONT = pygame.font.Font('freesansbold.ttf', 32)
 
     
@@ -155,6 +155,8 @@ def runGame():
             DISPLAYSURF.blit(playerObj['surface'], playerObj['rect'])
 
 
+        drawHealthMeter(playerObj['health'])
+        
         for event in pygame.event.get():
             if event.type == QUIT:
                 terminate()
@@ -245,6 +247,14 @@ def runGame():
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
+
+
+def drawHealthMeter(currentHealth):
+    for i in range(currentHealth):
+        pygame.draw.rect(DISPLAYSURF, RED,   (15, 5 + (10 * MAXHEALTH) - i * 10, 20, 10))
+    for i in range(MAXHEALTH): 
+        pygame.draw.rect(DISPLAYSURF, WHITE, (15, 5 + (10 * MAXHEALTH) - i * 10, 20, 10), 1)
 
 
 
