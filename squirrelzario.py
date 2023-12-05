@@ -106,6 +106,17 @@ def runGame():
         while len(squirrelObjs) < NUMSQUIRRELS:
             squirrelObjs.append(makeNewSquirrel(camerax, cameray))
 
+        playerCenterx = playerObj['x'] + int(playerObj['size'] / 2)
+        playerCentery = playerObj['y'] + int(playerObj['size'] / 2)
+        if (camerax + HALF_WINWIDTH) - playerCenterx > CAMERASLACK:
+            camerax = playerCenterx + CAMERASLACK - HALF_WINWIDTH
+        elif playerCenterx - (camerax + HALF_WINWIDTH) > CAMERASLACK:
+            camerax = playerCenterx - CAMERASLACK - HALF_WINWIDTH
+        if (cameray + HALF_WINHEIGHT) - playerCentery > CAMERASLACK:
+            cameray = playerCentery + CAMERASLACK - HALF_WINHEIGHT
+        elif playerCentery - (cameray + HALF_WINHEIGHT) > CAMERASLACK:
+            cameray = playerCentery - CAMERASLACK - HALF_WINHEIGHT
+        
 
         for sObj in squirrelObjs:
             sObj['rect'] = pygame.Rect( (sObj['x'] - camerax,
@@ -245,3 +256,5 @@ def isOutsideActiveArea(camerax, cameray, obj):
 
 if __name__ == '__main__':
     main()
+
+
