@@ -57,6 +57,20 @@ def runGame():
     gameOverStartTime = 0     
     winMode = False
 
+
+    gameOverSurf = BASICFONT.render('Game Over', True, WHITE)
+    gameOverRect = gameOverSurf.get_rect()
+    gameOverRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT)
+
+    winSurf = BASICFONT.render('You have achieved OMEGA SQUIRREL!', True, WHITE)
+    winRect = winSurf.get_rect()
+    winRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT)
+
+    winSurf2 = BASICFONT.render('(Press "r" to restart.)', True, WHITE)
+    winRect2 = winSurf2.get_rect()
+    winRect2.center = (HALF_WINWIDTH, HALF_WINHEIGHT + 30)
+    
+
     camerax = 0
     cameray = 0
 
@@ -81,6 +95,9 @@ def runGame():
 
     while True:
         DISPLAYSURF.fill(GRASSCOLOR)
+
+        if invulnerableMode and time.time() - invulnerableStartTime > INVULNTIME:
+            invulnerableMode = False
 
         for sObj in squirrelObjs:
             sObj['x'] += sObj['movex']
@@ -189,8 +206,41 @@ def runGame():
                 playerObj['bounce'] += 1
 
             if playerObj['bounce'] > BOUNCERATE:
-                playerObj['bounce'] = 0 
+                playerObj['bounce'] = 0
 
+
+            for i in range(len(squirrelObjs)-1, -1, -1):
+                sqObj = squirrelObjs[i]
+                if 'rect' in sqObj and playerObj['rect'].colliderect(sqObj['rect']):                  
+                    if sqObj['width'] * sqObj['height'] <= playerObj['size']**2:
+                        playerObj['size'] += int( (sqObj['width'] * sqObj['height'])**0.2 ) + 1
+                        del squirrelObjs[i]
+
+                        if playerObj['facing'] == LEFT:
+                            playerObj['surface'] = pygame.transform.scale(L_SQUIR_IMG, (playerObj['size'], playerObj['size']))
+                        if playerObj['facing'] == RIGHT:
+                            playerObj['surface'] = pygame.transform.scale(R_SQUIR_IMG, (playerObj['size'], playerObj['size']))
+
+                        if playerObj['size'] > WINSIZE:
+                            winMode = True
+
+                    elif not invulnerableMode:
+                        invulnerableMode = True
+                        invulnerableStartTime = time.time()
+                        playerObj['health'] -= 1
+                        if playerObj['health'] == 0:
+                            gameOverMode = True 
+                            gameOverStartTime = time.time()
+
+        else:
+            DISPLAYSURF.blit(gameOverSurf, gameOverRect)
+            if time.time() - gameOverStartTime > GAMEOVERTIME:
+                return
+
+        
+        if winMode:
+            DISPLAYSURF.blit(winSurf, winRect)
+            DISPLAYSURF.blit(winSurf2, winRect2)
 
 
         pygame.display.update()
