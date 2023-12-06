@@ -90,12 +90,14 @@ def runGame():
     moveUp    = False
     moveDown  = False
 
-    
+
+    for i in range(10):
+        grassObjs.append(makeNewGrass(camerax, cameray))
+        grassObjs[i]['x'] = random.randint(0, WINWIDTH)
+        grassObjs[i]['y'] = random.randint(0, WINHEIGHT)    
 
 
     while True:
-        DISPLAYSURF.fill(GRASSCOLOR)
-
         if invulnerableMode and time.time() - invulnerableStartTime > INVULNTIME:
             invulnerableMode = False
 
@@ -115,13 +117,20 @@ def runGame():
                     sObj['surface'] = pygame.transform.scale(L_SQUIR_IMG, (sObj['width'], sObj['height']))
                 
 
+        for i in range(len(grassObjs) - 1, -1, -1):
+            if isOutsideActiveArea(camerax, cameray, grassObjs[i]):
+                del grassObjs[i]
         for i in range(len(squirrelObjs) - 1, -1, -1):
             if isOutsideActiveArea(camerax, cameray, squirrelObjs[i]):
                 del squirrelObjs[i]
+        
 
-
+        while len(grassObjs) < NUMGRASS:
+            grassObjs.append(makeNewGrass(camerax, cameray))
         while len(squirrelObjs) < NUMSQUIRRELS:
             squirrelObjs.append(makeNewSquirrel(camerax, cameray))
+        
+            
 
         playerCenterx = playerObj['x'] + int(playerObj['size'] / 2)
         playerCentery = playerObj['y'] + int(playerObj['size'] / 2)
@@ -133,17 +142,24 @@ def runGame():
             cameray = playerCentery + CAMERASLACK - HALF_WINHEIGHT
         elif playerCentery - (cameray + HALF_WINHEIGHT) > CAMERASLACK:
             cameray = playerCentery - CAMERASLACK - HALF_WINHEIGHT
-        
 
+
+        DISPLAYSURF.fill(GRASSCOLOR)
+        
+        for gObj in grassObjs:
+            gRect = pygame.Rect( (gObj['x'] - camerax,
+                                  gObj['y'] - cameray,
+                                  gObj['width'],
+                                  gObj['height']) )
+            DISPLAYSURF.blit(GRASSIMAGES[gObj['grassImage']], gRect)
+
+            
         for sObj in squirrelObjs:
             sObj['rect'] = pygame.Rect( (sObj['x'] - camerax,
                                          sObj['y'] - cameray - getBounceAmount(sObj['bounce'], sObj['bouncerate'], sObj['bounceheight']),
                                          sObj['width'],
                                          sObj['height']) )
             DISPLAYSURF.blit(sObj['surface'], sObj['rect'])
-
-
-
 
 
         flashIsOn = round(time.time(), 1) * 10 % 2 == 1
@@ -283,6 +299,17 @@ def makeNewSquirrel(camerax, cameray):
 
 
 
+def makeNewGrass(camerax, cameray):
+    gr = {}
+    gr['grassImage'] = random.randint(0, len(GRASSIMAGES) - 1)
+    gr['width']  = GRASSIMAGES[0].get_width()
+    gr['height'] = GRASSIMAGES[0].get_height()
+    gr['x'], gr['y'] = getRandomOffCameraPos(camerax, cameray, gr['width'], gr['height'])
+    gr['rect'] = pygame.Rect( (gr['x'], gr['y'], gr['width'], gr['height']) )
+    return gr
+
+
+
 def terminate():
     pygame.quit()
     sys.exit()
@@ -316,5 +343,3 @@ def isOutsideActiveArea(camerax, cameray, obj):
 
 if __name__ == '__main__':
     main()
-
-
