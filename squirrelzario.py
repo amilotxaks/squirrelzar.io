@@ -22,7 +22,8 @@ GAMEOVERTIME = 4
 MAXHEALTH = 3
 
 NUMGRASS = 80        
-NUMSQUIRRELS = 30    
+NUMSQUIRRELS = 30
+NUMPOTION = 10
 SQUIRRELMINSPEED = 3 
 SQUIRRELMAXSPEED = 7 
 DIRCHANGEFREQ = 2    
@@ -31,7 +32,7 @@ RIGHT = 'right'
 
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, L_SQUIR_IMG, R_SQUIR_IMG, GRASSIMAGES
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, L_SQUIR_IMG, R_SQUIR_IMG, GRASSIMAGES, POTIONIMAGES
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -43,9 +44,13 @@ def main():
     
     L_SQUIR_IMG = pygame.image.load('squirrel.png')
     R_SQUIR_IMG = pygame.transform.flip(L_SQUIR_IMG, True, False)
+    POTIONIMAGES = []
     GRASSIMAGES = []
     for i in range(1, 5):
         GRASSIMAGES.append(pygame.image.load('grass%s.png' % i))
+    for i in range(1, 3):
+        POTIONIMAGES.append(pygame.image.load('potion%s.png' % i))
+
 
     while True:
         runGame()
@@ -76,6 +81,7 @@ def runGame():
 
     grassObjs = []    
     squirrelObjs = []
+    potionObjs = []
 
     playerObj = {'surface': pygame.transform.scale(L_SQUIR_IMG, (STARTSIZE, STARTSIZE)),
                  'facing': LEFT,
@@ -94,7 +100,13 @@ def runGame():
     for i in range(10):
         grassObjs.append(makeNewGrass(camerax, cameray))
         grassObjs[i]['x'] = random.randint(0, WINWIDTH)
-        grassObjs[i]['y'] = random.randint(0, WINHEIGHT)    
+        grassObjs[i]['y'] = random.randint(0, WINHEIGHT)
+
+
+    for i in range(2):
+        potionObjs.append(makeNewPotion(camerax, cameray))
+        potionObjs[i]['x'] = random.randint(0, WINWIDTH)
+        potionObjs[i]['y'] = random.randint(0, WINHEIGHT)
 
 
     while True:
@@ -117,6 +129,9 @@ def runGame():
                     sObj['surface'] = pygame.transform.scale(L_SQUIR_IMG, (sObj['width'], sObj['height']))
                 
 
+        for i in range(len(potionObjs) - 1, -1, -1):
+            if isOutsideActiveArea(camerax, cameray, potionObjs[i]):
+                del potionObjs[i]
         for i in range(len(grassObjs) - 1, -1, -1):
             if isOutsideActiveArea(camerax, cameray, grassObjs[i]):
                 del grassObjs[i]
@@ -124,11 +139,15 @@ def runGame():
             if isOutsideActiveArea(camerax, cameray, squirrelObjs[i]):
                 del squirrelObjs[i]
         
+        
 
+        while len(potionObjs) < NUMPOTION:
+            potionObjs.append(makeNewPotion(camerax, cameray))
         while len(grassObjs) < NUMGRASS:
             grassObjs.append(makeNewGrass(camerax, cameray))
         while len(squirrelObjs) < NUMSQUIRRELS:
             squirrelObjs.append(makeNewSquirrel(camerax, cameray))
+        
         
             
 
@@ -152,6 +171,13 @@ def runGame():
                                   gObj['width'],
                                   gObj['height']) )
             DISPLAYSURF.blit(GRASSIMAGES[gObj['grassImage']], gRect)
+
+        for gObj in potionObjs:
+            gRect = pygame.Rect( (gObj['x'] - camerax,
+                                  gObj['y'] - cameray,
+                                  gObj['width'],
+                                  gObj['height']) )
+            DISPLAYSURF.blit(POTIONIMAGES[gObj['potionImage']], gRect)
 
             
         for sObj in squirrelObjs:
@@ -309,6 +335,15 @@ def makeNewGrass(camerax, cameray):
     return gr
 
 
+def makeNewPotion(camerax, cameray):
+    po = {}
+    po['potionImage'] = random.randint(0, len(POTIONIMAGES) - 1)
+    po['width']  = POTIONIMAGES[0].get_width()
+    po['height'] = POTIONIMAGES[0].get_height()
+    po['x'], po['y'] = getRandomOffCameraPos(camerax, cameray, po['width'], po['height'])
+    po['rect'] = pygame.Rect( (po['x'], po['y'], po['width'], po['height']) )
+    return po
+
 
 def terminate():
     pygame.quit()
@@ -343,3 +378,5 @@ def isOutsideActiveArea(camerax, cameray, obj):
 
 if __name__ == '__main__':
     main()
+
+
