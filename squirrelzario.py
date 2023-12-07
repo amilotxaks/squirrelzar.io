@@ -2,8 +2,8 @@ import random, sys, time, math, pygame
 from pygame.locals import *
 
 FPS = 30
-WINWIDTH = 640 
-WINHEIGHT = 480 
+WINWIDTH = 1920 
+WINHEIGHT = 1080 
 HALF_WINWIDTH = int(WINWIDTH / 2)
 HALF_WINHEIGHT = int(WINHEIGHT / 2)
 
@@ -23,7 +23,7 @@ MAXHEALTH = 3
 
 NUMGRASS = 80        
 NUMSQUIRRELS = 30
-NUMPOTION = 10
+NUMPOTION = 5
 SQUIRRELMINSPEED = 3 
 SQUIRRELMAXSPEED = 7 
 DIRCHANGEFREQ = 2    
@@ -172,12 +172,12 @@ def runGame():
                                   gObj['height']) )
             DISPLAYSURF.blit(GRASSIMAGES[gObj['grassImage']], gRect)
 
-        for gObj in potionObjs:
-            gRect = pygame.Rect( (gObj['x'] - camerax,
-                                  gObj['y'] - cameray,
-                                  gObj['width'],
-                                  gObj['height']) )
-            DISPLAYSURF.blit(POTIONIMAGES[gObj['potionImage']], gRect)
+        for poObj in potionObjs:
+            poRect = pygame.Rect( (poObj['x'] - camerax,
+                                  poObj['y'] - cameray,
+                                  poObj['width'],
+                                  poObj['height']) )
+            DISPLAYSURF.blit(POTIONIMAGES[poObj['potionImage']], poRect)
 
             
         for sObj in squirrelObjs:
@@ -186,6 +186,7 @@ def runGame():
                                          sObj['width'],
                                          sObj['height']) )
             DISPLAYSURF.blit(sObj['surface'], sObj['rect'])
+
 
 
         flashIsOn = round(time.time(), 1) * 10 % 2 == 1
@@ -275,6 +276,15 @@ def runGame():
                         if playerObj['health'] == 0:
                             gameOverMode = True 
                             gameOverStartTime = time.time()
+
+            for i in range(len(potionObjs)-1, -1, -1):
+                poObj = potionObjs[i]
+                if 'rect' in poObj and playerObj['rect'].colliderect(poObj['rect']):
+                    del potionObjs[i]
+                    if playerObj['health']<3:
+                        playerObj['health'] += 1
+
+            
 
         else:
             DISPLAYSURF.blit(gameOverSurf, gameOverRect)
