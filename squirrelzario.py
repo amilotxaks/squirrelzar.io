@@ -32,7 +32,7 @@ RIGHT = 'right'
 
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, L_SQUIR_IMG, R_SQUIR_IMG, GRASSIMAGES, POTIONIMAGES
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, L_SQUIR_IMG, R_SQUIR_IMG, GRASSIMAGES, POTIONIMAGES, STONEIMAGES
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -46,10 +46,13 @@ def main():
     R_SQUIR_IMG = pygame.transform.flip(L_SQUIR_IMG, True, False)
     POTIONIMAGES = []
     GRASSIMAGES = []
+    STONEIMAGES = []
     for i in range(1, 5):
         GRASSIMAGES.append(pygame.image.load('grass%s.png' % i))
     for i in range(1, 3):
         POTIONIMAGES.append(pygame.image.load('potion%s.png' % i))
+    for i in range(1, 2):
+        STONEIMAGES.append(pygame.image.load('stone%s.png' % i))
 
 
     while True:
@@ -82,6 +85,7 @@ def runGame():
     grassObjs = []    
     squirrelObjs = []
     potionObjs = []
+    stoneObjs = []
 
     playerObj = {'surface': pygame.transform.scale(L_SQUIR_IMG, (STARTSIZE, STARTSIZE)),
                  'facing': LEFT,
@@ -108,6 +112,11 @@ def runGame():
         potionObjs[i]['x'] = random.randint(0, WINWIDTH)
         potionObjs[i]['y'] = random.randint(0, WINHEIGHT)
 
+
+    for i in range(6):
+        stoneObjs.append(makeNewStone(camerax, cameray))
+        stoneObjs[i]['x'] = random.randint(0, WINWIDTH)
+        stoneObjs[i]['y'] = random.randint(0, WINHEIGHT)
 
     while True:
         if invulnerableMode and time.time() - invulnerableStartTime > INVULNTIME:
@@ -138,6 +147,9 @@ def runGame():
         for i in range(len(squirrelObjs) - 1, -1, -1):
             if isOutsideActiveArea(camerax, cameray, squirrelObjs[i]):
                 del squirrelObjs[i]
+        for i in range(len(stoneObjs) - 1, -1, -1):
+            if isOutsideActiveArea(camerax, cameray, stoneObjs[i]):
+                del stoneObjs[i]
         
         
 
@@ -147,6 +159,8 @@ def runGame():
             grassObjs.append(makeNewGrass(camerax, cameray))
         while len(squirrelObjs) < NUMSQUIRRELS:
             squirrelObjs.append(makeNewSquirrel(camerax, cameray))
+        while len(stoneObjs) < NUMSQUIRRELS:
+            stoneObjs.append(makeNewStone(camerax, cameray))
         
         
             
@@ -173,13 +187,19 @@ def runGame():
             DISPLAYSURF.blit(GRASSIMAGES[gObj['grassImage']], gRect)
 
         for poObj in potionObjs:
-            poRect = pygame.Rect( (poObj['x'] - camerax,
+            poObj['rect'] = pygame.Rect( (poObj['x'] - camerax,
                                   poObj['y'] - cameray,
                                   poObj['width'],
                                   poObj['height']) )
-            DISPLAYSURF.blit(POTIONIMAGES[poObj['potionImage']], poRect)
+            DISPLAYSURF.blit(POTIONIMAGES[poObj['potionImage']], poObj['rect'])
 
-            
+        for stObj in stoneObjs:
+            stRect = pygame.Rect( (stObj['x'] - camerax,
+                                  stObj['y'] - cameray,
+                                  stObj['width'],
+                                  stObj['height']) )
+            DISPLAYSURF.blit(STONEIMAGES[stObj['stoneImage']], stRect)
+          
         for sObj in squirrelObjs:
             sObj['rect'] = pygame.Rect( (sObj['x'] - camerax,
                                          sObj['y'] - cameray - getBounceAmount(sObj['bounce'], sObj['bouncerate'], sObj['bounceheight']),
@@ -279,10 +299,11 @@ def runGame():
 
             for i in range(len(potionObjs)-1, -1, -1):
                 poObj = potionObjs[i]
-                if 'rect' in poObj and playerObj['rect'].colliderect(poObj['rect']):
-                    del potionObjs[i]
-                    if playerObj['health']<3:
-                        playerObj['health'] += 1
+                if poObj and playerObj['rect'].colliderect(poObj['rect']):
+                    if poObj['width'] * poObj['height'] <= playerObj['size']**2:
+                        if playerObj['health']<3:
+                            playerObj['health'] += 1
+                            del potionObjs[i]
 
             
 
@@ -353,6 +374,16 @@ def makeNewPotion(camerax, cameray):
     po['x'], po['y'] = getRandomOffCameraPos(camerax, cameray, po['width'], po['height'])
     po['rect'] = pygame.Rect( (po['x'], po['y'], po['width'], po['height']) )
     return po
+
+
+def makeNewStone(camerax, cameray):
+    st = {}
+    st['stoneImage'] = random.randint(0, len(STONEIMAGES) - 1)
+    st['width']  = STONEIMAGES[0].get_width()
+    st['height'] = STONEIMAGES[0].get_height()
+    st['x'], st['y'] = getRandomOffCameraPos(camerax, cameray, st['width'], st['height'])
+    st['rect'] = pygame.Rect( (st['x'], st['y'], st['width'], st['height']) )
+    return st
 
 
 def terminate():
