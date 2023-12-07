@@ -113,7 +113,7 @@ def runGame():
         potionObjs[i]['y'] = random.randint(0, WINHEIGHT)
 
 
-    for i in range(6):
+    for i in range(4):
         stoneObjs.append(makeNewStone(camerax, cameray))
         stoneObjs[i]['x'] = random.randint(0, WINWIDTH)
         stoneObjs[i]['y'] = random.randint(0, WINHEIGHT)
